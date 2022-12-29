@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { useDispatch } from 'react-redux';
@@ -20,12 +21,22 @@ export default SignUpScreen = ({ route }) => {
   const [region, setRegion] = useState('New Delhi');
   const [doctorDesc, setDoctorDesc] = useState('');
 
+  const [nameVal, setNameVal] = useState(true);
+  const [emailVal, setEmailVal] = useState(true);
+  const [cliNameVal, setCliNameVal] = useState(true);
+  const [cliAddVal, setCliAddVal] = useState(true);
+  const [feeVal, setFeeVal] = useState(true);
+  const [descVal, setDescVal] = useState(true);
+
+  const [registerLoading, setRegisterLoading] = useState(false);
+
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
   const [addDoctorHandler, { data, loading, error }] = useMutation(addDoctor, {
     onCompleted: (data) => {
       dispatch(doctorActions.setDoctor(data.insert_doctor_one));
+      setRegisterLoading(false);
       navigation.reset({
         index: 0,
         routes: [{ name: 'Tabs' }],
@@ -34,6 +45,49 @@ export default SignUpScreen = ({ route }) => {
   });
 
   const registerHandler = () => {
+    if (doctorName.length <= 5) {
+      setNameVal(false);
+      return;
+    } else if (doctorEmail.length <= 10) {
+      setNameVal(true);
+      setEmailVal(false);
+      return;
+    } else if (clinicName.length <= 5) {
+      setNameVal(true);
+      setEmailVal(true);
+      setCliNameVal(false);
+      return;
+    } else if (clinicAddress.length <= 10) {
+      setNameVal(true);
+      setEmailVal(true);
+      setCliNameVal(true);
+      setCliAddVal(false);
+      return;
+    } else if (parseInt(doctorFee) <= 0 || parseInt(doctorFee) >= 2500) {
+      setNameVal(true);
+      setEmailVal(true);
+      setCliNameVal(true);
+      setCliAddVal(true);
+      setFeeVal(false);
+      return;
+    } else if (doctorDesc.length <= 15) {
+      setNameVal(true);
+      setEmailVal(true);
+      setCliNameVal(true);
+      setCliAddVal(true);
+      setFeeVal(true);
+      setDescVal(false);
+      return;
+    } else {
+      setNameVal(true);
+      setCliNameVal(true);
+      setCliAddVal(true);
+      setEmailVal(true);
+      setFeeVal(true);
+      setDescVal(true);
+    }
+
+    setRegisterLoading(true);
     addDoctorHandler({
       variables: {
         aboutMe: doctorDesc,
@@ -56,7 +110,7 @@ export default SignUpScreen = ({ route }) => {
           Looks like you're new. Fill in these details to setup your account.
         </Text>
       </View>
-      <ScrollView style={styles.form}>
+      <KeyboardAwareScrollView style={styles.form}>
         <CustomTextInput
           label="Name"
           placeholder="Name..."
@@ -64,6 +118,8 @@ export default SignUpScreen = ({ route }) => {
           value={doctorName}
           editable={true}
           onChangeText={setDoctorName}
+          isValidated={nameVal}
+          valText="Please enter your full name"
         />
         <CustomTextInput
           label="Phone"
@@ -78,6 +134,8 @@ export default SignUpScreen = ({ route }) => {
           editable={true}
           onChangeText={setDoctorEmail}
           icon="mail-open"
+          isValidated={emailVal}
+          valText="Email seems to be wrong"
         />
         <CustomTextInput
           label="Clinic Name"
@@ -86,6 +144,8 @@ export default SignUpScreen = ({ route }) => {
           editable={true}
           onChangeText={setClinicName}
           icon="medkit"
+          isValidated={cliNameVal}
+          valText="Clinic name must have atleast 5 characters"
         />
         <CustomTextInput
           label="Clinic Address"
@@ -94,6 +154,8 @@ export default SignUpScreen = ({ route }) => {
           editable={true}
           onChangeText={setClinicAddress}
           icon="location"
+          isValidated={cliAddVal}
+          valText="Clinic address must atleast be 10 characters long"
         />
         <CustomTextInput
           label="Consultation Fee"
@@ -102,6 +164,9 @@ export default SignUpScreen = ({ route }) => {
           editable={true}
           prefix="₹"
           onChangeText={setDoctorFee}
+          isValidated={feeVal}
+          keyboardType="number-pad"
+          valText="Please enter a valid number"
         />
         <CustomTextInput
           label="Region"
@@ -117,16 +182,22 @@ export default SignUpScreen = ({ route }) => {
           onChangeText={setDoctorDesc}
           icon="person"
           multiline={true}
+          isValidated={descVal}
+          valText="Description is not wordy enough!"
         />
         <View style={styles.footer}>
-          <CustomButton
-            title="Register"
-            backgroundColor={Colors.primary500}
-            textColor={Colors.white}
-            onPress={registerHandler}
-          />
+          {registerLoading ? (
+            <ActivityIndicator size="small" color={Colors.primary500} />
+          ) : (
+            <CustomButton
+              title="Register"
+              backgroundColor={Colors.primary500}
+              textColor={Colors.white}
+              onPress={registerHandler}
+            />
+          )}
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </View>
   );
 };

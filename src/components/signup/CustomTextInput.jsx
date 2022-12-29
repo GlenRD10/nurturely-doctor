@@ -13,10 +13,16 @@ export default CustomTextInput = ({
   editable,
   icon,
   multiline,
+  isValidated,
+  keyboardType,
+  valText,
 }) => {
   return (
     <View style={styles.input}>
-      <Text style={styles.label}>{label}</Text>
+      <View style={styles.labelContainer}>
+        <Text style={styles.label}>{label}</Text>
+        {!isValidated && <Text style={styles.errorText}>{valText}</Text>}
+      </View>
       <View style={styles.inputBox}>
         <View style={{ flex: 1, alignItems: 'center', marginRight: 4 }}>
           {icon ? (
@@ -29,7 +35,7 @@ export default CustomTextInput = ({
           <TextInput
             placeholder={placeholder}
             placeholderTextColor={Colors.primary400}
-            keyboardType="default"
+            keyboardType={keyboardType}
             style={styles.inputField}
             value={value}
             onChangeText={onChangeText}
@@ -46,6 +52,15 @@ const styles = StyleSheet.create({
   input: {
     marginHorizontal: 16,
     marginVertical: 4,
+  },
+  labelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  errorText: {
+    fontSize: 10,
+    fontWeight: '500',
+    color: Colors.red,
   },
   label: {
     marginHorizontal: 8,
