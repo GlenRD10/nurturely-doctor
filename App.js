@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -7,6 +7,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { ApolloProvider } from '@apollo/client';
 import { Provider } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import WelcomeScreen from './src/screens/WelcomeScreen';
 import PhoneVerificationScreen from './src/screens/PhoneVerificationScreen';
@@ -35,9 +36,19 @@ const TabsScreen = () => {
         name="Home"
         component={HomeScreen}
         options={{
-          title: 'Nurturely Doctor',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Patients"
+        component={ProfileScreen}
+        options={{
+          title: 'My Patients',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="people" color={color} size={size} />
           ),
         }}
       />
@@ -47,7 +58,7 @@ const TabsScreen = () => {
         options={{
           title: 'My Profile',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" color={color} size={size} />
+            <Ionicons name="build" color={color} size={size} />
           ),
         }}
       />
@@ -57,12 +68,20 @@ const TabsScreen = () => {
 
 export default function App() {
   const [client] = useState(createAppolloClient);
+  const [myClientID, setMyClientID] = useState('');
+
+  useEffect(() => {
+    AsyncStorage.getItem('myClientID').then((myClientID) => {
+      setMyClientID(myClientID);
+    });
+  }, []);
+
   return (
     <Provider store={store}>
       <ApolloProvider client={client}>
         <NavigationContainer>
           <Stack.Navigator
-            initialRouteName="Welcome"
+            initialRouteName={myClientID === null ? 'Welcome' : 'Tabs'}
             screenOptions={{
               headerStyle: { backgroundColor: Colors.primary500 },
               headerTintColor: Colors.white,

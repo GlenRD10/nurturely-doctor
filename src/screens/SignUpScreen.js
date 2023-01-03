@@ -1,15 +1,15 @@
-import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import React, { useState } from 'react';
+import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
+
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation } from '@apollo/client';
-import { useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 
 import { Colors } from '../constants/color';
 import CustomTextInput from '../components/signup/CustomTextInput';
 import CustomButton from '../components/ui/CustomButton';
 import { addDoctor } from '../services/apis/mutations/doctor';
-import { doctorActions } from '../store/doctor';
 
 export default SignUpScreen = ({ route }) => {
   const [doctorName, setDoctorName] = useState('');
@@ -30,12 +30,19 @@ export default SignUpScreen = ({ route }) => {
 
   const [registerLoading, setRegisterLoading] = useState(false);
 
-  const dispatch = useDispatch();
   const navigation = useNavigation();
+
+  const storeClientID = async (id) => {
+    try {
+      await AsyncStorage.setItem('myClientID', id);
+    } catch (e) {
+      console.log('Something went wrong');
+    }
+  };
 
   const [addDoctorHandler, { data, loading, error }] = useMutation(addDoctor, {
     onCompleted: (data) => {
-      dispatch(doctorActions.setDoctor(data.insert_doctor_one));
+      storeClientID(data.insert_doctor_one.id);
       setRegisterLoading(false);
       navigation.reset({
         index: 0,

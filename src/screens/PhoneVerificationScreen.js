@@ -9,8 +9,8 @@ import {
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import React, { useState, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { useDispatch } from 'react-redux';
 import { useLazyQuery } from '@apollo/client';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha';
 import firebase from 'firebase/compat/app';
@@ -20,11 +20,9 @@ import { Colors } from '../constants/color';
 import CustomButton from '../components/ui/CustomButton';
 
 import { getDoctorByPhone } from '../services/apis/queries/doctor';
-import { doctorActions } from '../store/doctor';
 
 export default PhoneVerificationScreen = () => {
   const navigation = useNavigation();
-  const dispatch = useDispatch();
 
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
@@ -39,11 +37,20 @@ export default PhoneVerificationScreen = () => {
 
   const [phoneIsTrue, setPhoneIsTrue] = useState(true);
 
+  const storeClientID = async (id) => {
+    try {
+      await AsyncStorage.setItem('myClientID', id);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const [getDoctor, { error: getDoctorError }] = useLazyQuery(
     getDoctorByPhone,
     {
       variables: { phone: '+91' + phone },
       onCompleted: (data) => {
+        storeClientID(data.doctor[0].id);
         setOtpLoading(false);
         if (data.doctor.length === 0) {
           navigation.reset({
@@ -51,7 +58,6 @@ export default PhoneVerificationScreen = () => {
             routes: [{ name: 'SignUp', params: { phone: phone } }],
           });
         } else {
-          dispatch(doctorActions.setDoctor(data.doctor[0]));
           navigation.reset({
             index: 0,
             routes: [{ name: 'Tabs' }],
