@@ -12,6 +12,13 @@ const appointmentSlice = createSlice({
         }
       });
     },
+    removeAppointment: (state, action) => {
+      state.splice(
+        state.findIndex((item) => item.id === action.payload),
+        1
+      );
+    },
+    approveAppointment: (state, action) => {},
   },
 });
 

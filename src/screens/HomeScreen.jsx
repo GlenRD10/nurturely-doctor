@@ -18,10 +18,9 @@ import AppointmentList from '../components/home/AppointmentList';
 import { appointmentActions } from '../store/appointment';
 
 export default HomeScreen = () => {
-  const navigation = useNavigation();
   const dispatch = useDispatch();
-  // const doctor = useSelector((state) => state.doctor);
-
+  const [selectedTab, setSelectedTab] = useState('Today');
+  const [skip, setSkip] = React.useState(false);
   const [myClientID, setMyClientID] = useState('');
 
   useEffect(() => {
@@ -32,7 +31,18 @@ export default HomeScreen = () => {
 
   const { data, loading, error } = useQuery(getDoctorById, {
     variables: { id: myClientID },
+    skip,
+    onCompleted: (data) => {
+      dispatch(
+        appointmentActions.setAppointments(data.doctor_by_pk.appointments)
+      );
+      dispatch(doctorActions.setDoctor(data.doctor_by_pk));
+    },
   });
+
+  useEffect(() => {
+    if (!loading && !data) setSkip(true);
+  }, [data, loading]);
 
   if (loading) {
     return (
@@ -55,13 +65,13 @@ export default HomeScreen = () => {
     );
   }
 
-  dispatch(appointmentActions.setAppointments(data.doctor_by_pk.appointments));
-  dispatch(doctorActions.setDoctor(data.doctor_by_pk));
-
   return (
     <View style={styles.container}>
-      <Header />
-      <AppointmentList />
+      <Header selectedTab={selectedTab} />
+      <AppointmentList
+        selectedTab={selectedTab}
+        setSelectedTab={setSelectedTab}
+      />
     </View>
   );
 };

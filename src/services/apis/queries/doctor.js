@@ -22,7 +22,7 @@ export const getDoctorById = gql`
       name
       phone
       region
-      appointments {
+      appointments(order_by: { dateTime: asc }) {
         id
         dateTime
         description
