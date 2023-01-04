@@ -22,7 +22,8 @@ export default Header = ({ selectedTab }) => {
       if (
         today.getDate() === appDate.getDate() &&
         today.getMonth() === appDate.getMonth() &&
-        today.getFullYear() === appDate.getFullYear()
+        today.getFullYear() === appDate.getFullYear() &&
+        appointment.status === 'approved'
       )
         tod++;
 

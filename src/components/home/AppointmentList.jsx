@@ -20,7 +20,7 @@ export default AppointmentList = ({ selectedTab, setSelectedTab }) => {
             if (appointment.status === 'approved') {
               return (
                 <AppointmentCard
-                  key={appointment.dateTime}
+                  key={appointment.id}
                   appointment={appointment}
                   type="approved"
                 />
@@ -41,7 +41,7 @@ export default AppointmentList = ({ selectedTab, setSelectedTab }) => {
             if (appointment.status === 'pending') {
               return (
                 <AppointmentCard
-                  key={appointment.dateTime}
+                  key={appointment.id}
                   appointment={appointment}
                   type="pending"
                 />
@@ -64,11 +64,12 @@ export default AppointmentList = ({ selectedTab, setSelectedTab }) => {
           if (
             today.getDate() === appDate.getDate() &&
             today.getMonth() === appDate.getMonth() &&
-            today.getFullYear() === appDate.getFullYear()
+            today.getFullYear() === appDate.getFullYear() &&
+            appointment.status === 'approved'
           ) {
             return (
               <AppointmentCard
-                key={appointment.dateTime}
+                key={appointment.id}
                 appointment={appointment}
                 type="approved"
               />

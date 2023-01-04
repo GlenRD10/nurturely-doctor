@@ -1,4 +1,10 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  ActivityIndicator,
+} from 'react-native';
 import React from 'react';
 
 import { useDispatch } from 'react-redux';
@@ -8,7 +14,10 @@ import Moment from 'moment';
 
 import { Colors } from '../../constants/color';
 import { appointmentActions } from '../../store/appointment';
-import { deleteAppointmentById } from '../../services/apis/mutations/appointment';
+import {
+  approveAppointmentById,
+  deleteAppointmentById,
+} from '../../services/apis/mutations/appointment';
 
 export default AppointmentCard = ({ appointment, type }) => {
   const dispatch = useDispatch();
@@ -30,14 +39,14 @@ export default AppointmentCard = ({ appointment, type }) => {
 
   const userAge = getAge(appointment.user.dateOfBirth);
 
-  const approveHandler = () => {};
-
-  const [deleteAppointmentMutation, { data, loading: declineLoading, error }] =
-    useMutation(deleteAppointmentById, { variables: { id: appointment.id } });
+  //TODO: Add error handling for error in deleting appointment
+  const [
+    deleteAppointmentMutation,
+    { loading: declineLoading, error: declineError },
+  ] = useMutation(deleteAppointmentById, { variables: { id: appointment.id } });
 
   const declineHandler = () => {
     deleteAppointmentMutation().then((response) => {
-      console.log(response.data.delete_appointment_by_pk.id);
       dispatch(
         appointmentActions.removeAppointment(
           response.data.delete_appointment_by_pk.id
@@ -46,8 +55,25 @@ export default AppointmentCard = ({ appointment, type }) => {
     });
   };
 
+  const [
+    approveAppointmentMutation,
+    { loading: approveLoading, error: approveError },
+  ] = useMutation(approveAppointmentById, {
+    variables: { id: appointment.id },
+  });
+
+  const approveHandler = () => {
+    approveAppointmentMutation().then((response) => {
+      dispatch(
+        appointmentActions.approveAppointment(
+          response.data.update_appointment_by_pk.id
+        )
+      );
+    });
+  };
+
   return (
-    <View key={appointment.dateTime} style={styles.container}>
+    <View key={appointment.id} style={styles.container}>
       <View style={styles.appointmentCard}>
         <View style={{ flex: 2.5 }}>
           <Text style={styles.subHeading}>{Moment(appDate).format('ll')}</Text>
@@ -65,11 +91,15 @@ export default AppointmentCard = ({ appointment, type }) => {
       {type === 'pending' ? (
         <View style={styles.pendingContainer}>
           <Pressable style={styles.buttons} onPress={approveHandler}>
-            <Text style={styles.buttonText}>Approve</Text>
+            {approveLoading ? (
+              <ActivityIndicator size="small" color={Colors.primary500} />
+            ) : (
+              <Text style={styles.buttonText}>Approve</Text>
+            )}
           </Pressable>
           <Pressable style={styles.buttons} onPress={declineHandler}>
             {declineLoading ? (
-              <Text>Loading...</Text>
+              <ActivityIndicator size="small" color={Colors.primary500} />
             ) : (
               <Text style={styles.buttonText}>Decline</Text>
             )}

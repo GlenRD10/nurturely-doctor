@@ -18,7 +18,10 @@ const appointmentSlice = createSlice({
         1
       );
     },
-    approveAppointment: (state, action) => {},
+    approveAppointment: (state, action) => {
+      const index = state.findIndex((item) => item.id === action.payload);
+      state[index].status = 'approved';
+    },
   },
 });
 
